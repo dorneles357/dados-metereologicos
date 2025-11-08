@@ -10,7 +10,6 @@ runtime: shiny
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(dplyr)
-
 df <- readr::read_csv("../data/santa_maria_2025.csv")
 df <- df %>%
   dplyr::arrange(mes_num) %>%
@@ -23,13 +22,12 @@ df <- df %>%
 ## Column {.sidebar}
 
 ```{r}
-choices <- c("Temperatura Máxima (°C)" = "temperatura_maxima_na_hora_ant_aut_c", 
+choices <- c("Temperatura Máxima (°C)" = "temperatura_maxima_na_hora_ant_aut_c",
   "Temperatura Mínima (°C)" = "temperatura_minima_na_hora_ant_aut_c",
   "Umidade relativa (%)" = "umidade_relativa_do_ar_horaria_percent",
   "Pressão atmosférica (mb)" = "pressao_atmosferica_ao_nivel_da_estacao_horaria_m_b",
-  "Preciptação total (mm)" = "precipitacao_total_horario_mm" 
+  "Preciptação total (mm)" = "precipitacao_total_horario_mm"
 )
-
 shiny::selectInput(
   inputId = "coluna",
   label = "Escolha a variável:",
@@ -44,9 +42,7 @@ shiny::selectInput(
 
 ```{r}
 shiny::renderPlot({
-
   labels_colunas <- setNames(names(choices), choices)
-
   ggplot2::ggplot(
     df,
     ggplot2::aes(x = mes_nome, y = !!sym(input$coluna))
@@ -79,9 +75,7 @@ shiny::renderPlot({
 
 ```{r}
 shiny::renderPlot({
-
   labels_colunas <- setNames(names(choices), choices)
-
   ggplot2::ggplot(df, ggplot2::aes(x = !!sym(input$coluna))) +
     ggplot2::geom_histogram(
       fill = "skyblue",
@@ -126,4 +120,116 @@ shiny::renderTable({
 
 # Por mês
 
+## Column {.sidebar}
+
+```{r}
+choices <- c("Temperatura Máxima (°C)" = "temperatura_maxima_na_hora_ant_aut_c",
+  "Temperatura Mínima (°C)" = "temperatura_minima_na_hora_ant_aut_c",
+  "Umidade relativa (%)" = "umidade_relativa_do_ar_horaria_percent",
+  "Pressão atmosférica (mb)" = "pressao_atmosferica_ao_nivel_da_estacao_horaria_m_b",
+  "Preciptação total (mm)" = "precipitacao_total_horario_mm"
+)
+shiny::selectInput(
+  inputId = "coluna",
+  label = "Escolha a variável:",
+  choices = choices,
+  selected = "temperatura_maxima_na_hora_ant_aut_c"
+)
+shiny::selectInput(
+  inputId = "mes",
+  label = "Escolha o mês:",
+  choices = sort(unique(df$mes_nome)),
+  selected = "January"
+)
+```
+
+## Column {data-width="650"}
+
+### Distribuição ao longo dos dias
+
+```{r}
+shiny::renderPlot({
+  df |>
+    dplyr::mutate(day = lubridate::day(data)) |>
+    dplyr::filter(mes_nome == input$mes) |>
+    ggplot2::ggplot(ggplot2::aes(x = day, y = !!sym(input$coluna))) +
+    ggplot2::geom_point(alpha = 0.6, size = 1) +
+    ggplot2::geom_smooth()
+})
+```
+
+## Column {data-width="350"}
+
+### Histograma
+
+```{r}
+shiny::renderPlot({
+  df |>
+    dplyr::mutate(day = lubridate::day(data)) |>
+    dplyr::filter(mes_nome == input$mes) |>
+    ggplot2::ggplot(ggplot2::aes(x = !!sym(input$coluna))) +
+    ggplot2::geom_histogram()
+})
+```
+
+### Sumário
+
+```{r}
+shiny::renderTable({
+  df |>
+    dplyr::mutate(dado = !!sym(input$coluna), dia = lubridate::day(data)) |>
+    dplyr::filter(mes_nome == input$mes) |>
+    dplyr::group_by(dia) |>
+    dplyr::summarise(
+      media = mean(dado, na.rm = TRUE),
+      max = max(dado, na.rm = TRUE),
+      min = min(dado, na.rm = TRUE),
+      .groups = "drop"
+    )
+})
+```
+
 # Por dia
+
+## Column {.sidebar}
+
+```{r}
+choices <- c("Temperatura Máxima (°C)" = "temperatura_maxima_na_hora_ant_aut_c",
+  "Temperatura Mínima (°C)" = "temperatura_minima_na_hora_ant_aut_c",
+  "Umidade relativa (%)" = "umidade_relativa_do_ar_horaria_percent",
+  "Pressão atmosférica (mb)" = "pressao_atmosferica_ao_nivel_da_estacao_horaria_m_b",
+  "Preciptação total (mm)" = "precipitacao_total_horario_mm"
+)
+shiny::selectInput(
+  inputId = "coluna",
+  label = "Escolha a variável:",
+  choices = choices,
+  selected = "temperatura_maxima_na_hora_ant_aut_c"
+)
+shiny::selectInput(
+  inputId = "mes",
+  label = "Escolha o mês:",
+  choices = sort(unique(df$mes_nome)),
+  selected = "January"
+)
+shiny::selectInput(
+  inputId = "dia",
+  label = "Escolha o dia:",
+  choices = seq(1:31),
+  selected = 1
+)
+```
+
+## Column {data-width="650"}
+
+### Distribuição ao longo dos dias
+
+```{r}
+shiny::renderPlot({
+  df |>
+  dplyr::mutate(day = lubridate::day(data)) |>
+  dplyr::filter(mes_nome == input$mes & day == input$dia) |>
+  ggplot2::ggplot(ggplot2::aes(x = hora_utc, y = !!sym(input$coluna))) +
+  ggplot2::geom_point()
+})
+```
