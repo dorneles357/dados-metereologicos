@@ -6,5 +6,7 @@ install.packages(c(
   "ggplot2",
   "janitor",
   "qcc",
-  "zoo"
+  "zoo",
+  "flexdashboard",
+  "shiny",
 ))

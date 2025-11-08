@@ -15,4 +15,6 @@ df <- santa_maria_2025 |>
   ) |>
   janitor::clean_names()
 
+readr::write_csv(df, "data/santa_maria_2025.csv")
+
 rm(santa_maria_2025)
