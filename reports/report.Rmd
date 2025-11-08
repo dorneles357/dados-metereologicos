@@ -1,0 +1,129 @@
+---
+title: "Análise de dados metereológicos"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(dplyr)
+
+df <- readr::read_csv("../data/santa_maria_2025.csv")
+df <- df %>%
+  dplyr::arrange(mes_num) %>%
+  dplyr::mutate(mes_nome = factor(mes_nome,
+                                  levels = unique(mes_nome)))
+```
+
+# Por ano
+
+## Column {.sidebar}
+
+```{r}
+choices <- c("Temperatura Máxima (°C)" = "temperatura_maxima_na_hora_ant_aut_c", 
+  "Temperatura Mínima (°C)" = "temperatura_minima_na_hora_ant_aut_c",
+  "Umidade relativa (%)" = "umidade_relativa_do_ar_horaria_percent",
+  "Pressão atmosférica (mb)" = "pressao_atmosferica_ao_nivel_da_estacao_horaria_m_b",
+  "Preciptação total (mm)" = "precipitacao_total_horario_mm" 
+)
+
+shiny::selectInput(
+  inputId = "coluna",
+  label = "Escolha a variável:",
+  choices = choices,
+  selected = "temperatura_maxima_na_hora_ant_aut_c"
+)
+```
+
+## Column {data-width="650"}
+
+### Boxplot
+
+```{r}
+shiny::renderPlot({
+
+  labels_colunas <- setNames(names(choices), choices)
+
+  ggplot2::ggplot(
+    df,
+    ggplot2::aes(x = mes_nome, y = !!sym(input$coluna))
+  ) +
+    ggplot2::geom_boxplot(fill = "skyblue", alpha = 0.7) +
+    ggplot2::stat_summary(
+      fun = mean,
+      geom = "point",
+      shape = 23,
+      size = 3.5,
+      fill = "red"
+    ) +
+    ggplot2::labs(
+      x = "Mês",
+      y = labels_colunas[[input$coluna]],
+      title = paste("Distribuição Mensal de", labels_colunas[[input$coluna]])
+    ) +
+    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(size = 16, face = "bold"),
+      axis.title = ggplot2::element_text(size = 14),
+      axis.text = ggplot2::element_text(size = 12)
+    )
+})
+```
+
+## Column {data-width="350"}
+
+### Histograma
+
+```{r}
+shiny::renderPlot({
+
+  labels_colunas <- setNames(names(choices), choices)
+
+  ggplot2::ggplot(df, ggplot2::aes(x = !!sym(input$coluna))) +
+    ggplot2::geom_histogram(
+      fill = "skyblue",
+      color = "white",
+      bins = 30,
+      alpha = 0.8
+    ) +
+    ggplot2::labs(
+      x = labels_colunas[[input$coluna]],
+      y = "Frequência",
+      title = paste("Distribuição de", labels_colunas[[input$coluna]])
+    ) +
+    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(size = 16, face = "bold"),
+      axis.title = ggplot2::element_text(size = 14),
+      axis.text = ggplot2::element_text(size = 12)
+    )
+})
+```
+
+### Sumario
+
+```{r}
+shiny::renderTable({
+  df |>
+    dplyr::mutate(
+      dado = !!sym(input$coluna)
+    ) |>
+    dplyr::group_by(data) |>
+    dplyr::summarise(
+      media = mean(dado, na.rm = TRUE),
+      max = max(dado, na.rm = TRUE),
+      min = min(dado, na.rm = TRUE),
+      .groups = "drop"
+    ) |>
+    dplyr::mutate(
+      data = as.character(data)
+    )
+})
+```
+
+# Por mês
+
+# Por dia
