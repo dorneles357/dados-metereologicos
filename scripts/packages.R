@@ -1,0 +1,10 @@
+install.packages(c(
+  "dplyr",
+  "readr",
+  "stringr",
+  "lubridate",
+  "ggplot2",
+  "janitor",
+  "qcc",
+  "zoo"
+))
