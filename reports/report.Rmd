@@ -42,7 +42,9 @@ shiny::selectInput(
 
 ```{r}
 shiny::renderPlot({
+  
   labels_colunas <- setNames(names(choices), choices)
+  
   ggplot2::ggplot(
     df,
     ggplot2::aes(x = mes_nome, y = !!sym(input$coluna))
@@ -75,7 +77,9 @@ shiny::renderPlot({
 
 ```{r}
 shiny::renderPlot({
+  
   labels_colunas <- setNames(names(choices), choices)
+  
   ggplot2::ggplot(df, ggplot2::aes(x = !!sym(input$coluna))) +
     ggplot2::geom_histogram(
       fill = "skyblue",
@@ -149,12 +153,26 @@ shiny::selectInput(
 
 ```{r}
 shiny::renderPlot({
+  
+  labels_colunas <- setNames(names(choices), choices)
+  
   df |>
     dplyr::mutate(day = lubridate::day(data)) |>
     dplyr::filter(mes_nome == input$mes) |>
     ggplot2::ggplot(ggplot2::aes(x = day, y = !!sym(input$coluna))) +
     ggplot2::geom_point(alpha = 0.6, size = 1) +
-    ggplot2::geom_smooth()
+    ggplot2::geom_smooth() +
+    ggplot2::labs(
+      x = "Dia",
+      y = labels_colunas[[input$coluna]],
+      title = paste("Distribuição de", labels_colunas[[input$coluna]])
+    ) +
+    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(size = 16, face = "bold"),
+      axis.title = ggplot2::element_text(size = 14),
+      axis.text = ggplot2::element_text(size = 12)
+    )
 })
 ```
 
@@ -164,11 +182,30 @@ shiny::renderPlot({
 
 ```{r}
 shiny::renderPlot({
+  
+  labels_colunas <- setNames(names(choices), choices)
+  
   df |>
     dplyr::mutate(day = lubridate::day(data)) |>
     dplyr::filter(mes_nome == input$mes) |>
     ggplot2::ggplot(ggplot2::aes(x = !!sym(input$coluna))) +
-    ggplot2::geom_histogram()
+    ggplot2::geom_histogram(
+      fill = "skyblue",
+      color = "white",
+      bins = 30,
+      alpha = 0.8
+    ) +
+    ggplot2::labs(
+      x = labels_colunas[[input$coluna]],
+      y = "Frequência",
+      title = paste("Distribuição de", labels_colunas[[input$coluna]])
+    ) +
+    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(size = 16, face = "bold"),
+      axis.title = ggplot2::element_text(size = 14),
+      axis.text = ggplot2::element_text(size = 12)
+    )
 })
 ```
 
@@ -226,10 +263,30 @@ shiny::selectInput(
 
 ```{r}
 shiny::renderPlot({
+  
+  labels_colunas <- setNames(names(choices), choices)
+  
   df |>
-  dplyr::mutate(day = lubridate::day(data)) |>
-  dplyr::filter(mes_nome == input$mes & day == input$dia) |>
-  ggplot2::ggplot(ggplot2::aes(x = hora_utc, y = !!sym(input$coluna))) +
-  ggplot2::geom_point()
+    dplyr::mutate(day = lubridate::day(data),
+                  hora_num = as.numeric(substr(hora_utc, 1, 2))) |>
+    dplyr::filter(mes_nome == input$mes & day == input$dia) |>
+    ggplot2::ggplot(ggplot2::aes(x = hora_num, y = !!sym(input$coluna))) +
+    ggplot2::geom_point() +
+    ggplot2::labs(
+      x = "Hora UTC",
+      y = labels_colunas[[input$coluna]],
+      title = paste("Distribuição de", labels_colunas[[input$coluna]])
+    ) +
+    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::theme(
+      plot.title = ggplot2::element_text(size = 16, face = "bold"),
+      axis.title = ggplot2::element_text(size = 14),
+      axis.text = ggplot2::element_text(size = 12)
+    ) +
+    ggplot2::scale_x_continuous(
+     breaks = c(0, 12, 23),
+     labels = c("00", "12", "23"),
+     limits = c(0, 23)
+   ) 
 })
 ```
