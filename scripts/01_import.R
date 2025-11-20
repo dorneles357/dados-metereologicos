@@ -10,11 +10,17 @@ if (file.exists("data/raw/extracts/files.txt")) {
   stop("Arquivo data/raw/extracts/files.txt não encontrado!")
 }
 
+# ---------------------------------------------------------
 # 1. Explorar os dados disponíveis
+# ---------------------------------------------------------
 info_completa <- explorar_arquivos(arquivos_csv)
 
+# ---------------------------------------------------------
 # 2. Filtrar por ano
+# ---------------------------------------------------------
 arquivos_2020 <- filtrar_arquivos(arquivos_csv, anos = 2020)
 
+# ---------------------------------------------------------
 # 3. Filtrar por UF
+# ---------------------------------------------------------
 arquivos_sp <- filtrar_arquivos(arquivos_csv, ufs = "SP")

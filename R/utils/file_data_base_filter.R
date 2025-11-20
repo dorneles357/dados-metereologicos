@@ -14,7 +14,6 @@ extrair_info_arquivos <- function(arquivos) {
   )
 }
 
-# Função para filtrar arquivos
 filtrar_arquivos <- function(
   arquivos,
   anos = NULL,
