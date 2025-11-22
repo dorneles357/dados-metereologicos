@@ -8,7 +8,7 @@ library(purrr)
 ## CONFIGURAÇÃO ----------------------------------------------------------------
 
 ANO_INICIO <- 2015
-ANO_FIM <- 2023
+ANO_FIM <- 2025
 
 # Estações estratégicas para análise
 ESTACOES_ESTRATEGICAS <- c(
