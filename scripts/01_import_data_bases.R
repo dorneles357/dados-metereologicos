@@ -18,9 +18,9 @@ info_completa <- explorar_arquivos(arquivos_csv)
 # ---------------------------------------------------------
 # 2. Filtrar por ano
 # ---------------------------------------------------------
-arquivos_2020 <- filtrar_arquivos(arquivos_csv, anos = 2020:2025)
+arquivos_2020 <- filtrar_arquivos(arquivos_csv, anos = c(2020:2025))
 
 # ---------------------------------------------------------
 # 3. Filtrar por UF
 # ---------------------------------------------------------
-arquivos_rs <- filtrar_arquivos(arquivos_csv, ufs = "RS")
+arquivos_rs <- filtrar_arquivos(arquivos_2020, ufs = "RS")
